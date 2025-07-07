@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Gloati</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffaf7;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-container {
+      background-color: #fff;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.5s ease;
+    }
+    h2 {
+      text-align: center;
+      color: #6ca59e;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 2.5rem;
+      border: none;
+      border-bottom: 2px solid #ccc;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.3s;
+      font-size: 1rem;
+    }
+
+    .form-group label {
+      position: absolute;
+      left: 2.5rem;
+      top: 1rem;
+      color: #888;
+      transition: 0.3s ease;
+      pointer-events: none;
+    }
+
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label {
+      top: -0.4rem;
+      left: 2.4rem;
+      font-size: 0.75rem;
+      color: #6ca59e;
+      background: #fffaf7;
+      padding: 0 0.3rem;
+    }
+
+    .form-group i {
+      position: absolute;
+      left: 0.8rem;
+      top: 1rem;
+      color: #aaa;
+    }
+
+    .form-group input:focus {
+      border-color: #6ca59e;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      background-color: #6ca59e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #55877f;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 0.8rem;
+      top: 0.5rem;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 1rem;
+    }
+
+    .toggle-password:hover {
+      color: #6ca59e;
+    }
+
+
+    .footer {
+      text-align: center;
+      font-size: 0.95rem;
+      margin-top: 1.2rem;
+    }
+
+    .footer a {
+      color: #6ca59e;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+      100% { transform: translateX(0); }
+    }
+
+    .shake {
+      animation: shake 0.4s ease-in-out;
+      border-bottom-color: #e74c3c !important;
+    }
+  </style>
+  <script src="https://kit.fontawesome.com/a2d79d76d8.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login to Gloati</h2>
+    <form method="POST" action="login.php" id="loginForm">
+      <div class="form-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="username" name="username" required placeholder=" " />
+        <label for="username">Username</label>
+      </div>
+      <div class="form-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" name="password" required placeholder=" " />
+        <label for="password">Password</label>
+        <span class="toggle-password" onclick="togglePassword()">
+          <i class="fas fa-eye" id="toggleIcon"></i>
+        </span>
+      </div>
+
+      <button type="submit">Login</button>
+      <div class="footer">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const icon = document.getElementById("toggleIcon");
+
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    const form = document.getElementById("loginForm");
+    form.addEventListener("submit", function (e) {
+      const inputs = form.querySelectorAll("input");
+      let error = false;
+
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add("shake");
+          error = true;
+          setTimeout(() => input.classList.remove("shake"), 400);
+        }
+      });
+
+      if (error) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

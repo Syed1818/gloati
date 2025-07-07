@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gloati | Shop</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffaf7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background: #fff;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+.wrapper {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.sidebar ul li a:hover {
+  background-color: #34495e;
+}
+
+
+    .logo {
+      font-size: 1.8rem;
+      color: #6ca59e;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .product {
+      background: #fff;
+      border: 1px solid #eee;
+      padding: 1rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .product img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .product h3 {
+      margin: 1rem 0 0.5rem;
+    }
+    .product p {
+      color: #777;
+      font-size: 0.95rem;
+    }
+    .product button {
+      margin-top: 10px;
+      padding: 0.5rem 1rem;
+      background-color: #6ca59e;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .product button:hover {
+      background-color: #55877f;
+    }
+    #cart {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #6ca59e;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      z-index: 100;
+    }
+    #cartItems {
+      position: fixed;
+      top: 3.5rem;
+      right: 1rem;
+      background: white;
+      border: 1px solid #ccc;
+      width: 320px;
+      max-height: 500px;
+      overflow-y: auto;
+      border-radius: 10px;
+      padding: 1rem;
+      display: none;
+    }
+    #cartItems ul {
+      list-style: none;
+      padding: 0;
+    }
+    #cartItems li {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    #cartItems button {
+      margin: 0 4px;
+      padding: 0.2rem 0.5rem;
+      background-color: #eee;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #cartItems button:hover {
+      background-color: #ddd;
+    }
+    .checkout {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #6ca59e;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Gloati</div>
+    <div id="cart" onclick="toggleCart()">Cart (<span id="cartCount">0</span>)</div>
+</header>
+<div class="wrapper">
+  <nav class="sidebar">
+      <ul>
+        <li><a href="homepage.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    </div>
+  <div id="cartItems">
+    <h4>Your Cart</h4>
+    <ul id="cartList"></ul>
+    <p><strong>Total:</strong> ₹<span id="cartTotal">0</span></p>
+    <button class="checkout" onclick="checkout()">Checkout</button>
+  </div>
+
+  <div class="container">
+    <h2>Shop All Products</h2>
+    <div class="products" id="productList"></div>
+  </div>
+
+  <script>
+    const products = [
+      { id: 1, name: "Hydrating Serum", price: 799, image: "https://images.unsplash.com/photo-1600180758420-4f35b4f28d4d?auto=format&fit=crop&w=600&q=80" },
+      { id: 2, name: "Glow Cleanser", price: 499, image: "https://images.unsplash.com/photo-1598201515530-a85b6d0c5792?auto=format&fit=crop&w=600&q=80" },
+      { id: 3, name: "SPF 50 Sunscreen", price: 899, image: "https://images.unsplash.com/photo-1597293858932-449c0045e4f3?auto=format&fit=crop&w=600&q=80" },
+    ];
+
+    let cart = JSON.parse(localStorage.getItem("gloatiCart")) || [];
+
+    function renderProducts() {
+      const productList = document.getElementById("productList");
+      productList.innerHTML = products.map(product => `
+        <div class="product">
+          <img src="${product.image}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>₹${product.price}</p>
+          <button onclick="addToCart(${product.id})">Add to Cart</button>
+        </div>
+      `).join("");
+    }
+
+    function addToCart(productId) {
+      const index = cart.findIndex(item => item.id === productId);
+      if (index > -1) {
+        cart[index].qty += 1;
+      } else {
+        const product = products.find(p => p.id === productId);
+        cart.push({ ...product, qty: 1 });
+      }
+      saveCart();
+      updateCart();
+    }
+
+    function removeFromCart(productId) {
+      const index = cart.findIndex(item => item.id === productId);
+      if (index > -1) {
+        if (cart[index].qty > 1) {
+          cart[index].qty -= 1;
+        } else {
+          cart.splice(index, 1);
+        }
+      }
+      saveCart();
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartList = document.getElementById("cartList");
+      const cartCount = document.getElementById("cartCount");
+      const cartTotal = document.getElementById("cartTotal");
+      let total = 0;
+      let count = 0;
+
+      cartList.innerHTML = cart.map(item => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        count += item.qty;
+        return `
+          <li>
+            ${item.name} x ${item.qty} = ₹${itemTotal}<br />
+            <button onclick="addToCart(${item.id})">+</button>
+            <button onclick="removeFromCart(${item.id})">-</button>
+          </li>`;
+      }).join("");
+
+      cartCount.textContent = count;
+      cartTotal.textContent = total;
+    }
+
+    function saveCart() {
+      localStorage.setItem("gloatiCart", JSON.stringify(cart));
+    }
+
+    function toggleCart() {
+      const cartItems = document.getElementById("cartItems");
+      cartItems.style.display = cartItems.style.display === "block" ? "none" : "block";
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+      alert("Thank you for your purchase! You will be redirected to login/checkout.");
+      localStorage.removeItem("gloatiCart");
+      cart = [];
+      updateCart();
+    }
+
+    renderProducts();
+    updateCart();
+  </script>
+</body>
+</html>
