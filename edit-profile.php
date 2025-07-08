@@ -5,17 +5,15 @@ if (!isset($_SESSION['user'])) {
   exit();
 }
 
-include 'connect.php'; // optional: use this instead of raw mysqli
+include 'connect.php'; // ensures $conn is PDO
 
 $username = $_SESSION['user'];
 $success = $error = "";
 
-// Get current user info
-$stmt = $conn->prepare("SELECT profile_image, email, phone, address FROM users WHERE username = ?");
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
+// Fetch user info
+$stmt = $conn->prepare("SELECT profile_image, email, phone, address FROM users WHERE username = :username");
+$stmt->execute([':username' => $username]);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $currentImage = $row['profile_image'] ?? 'default-avatar.png';
 $email = $row['email'] ?? '';
@@ -29,10 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $newAddress = trim($_POST['address'] ?? '');
 
   if ($newEmail && $newPhone && $newAddress) {
-    $stmt = $conn->prepare("UPDATE users SET email = ?, phone = ?, address = ? WHERE username = ?");
-    $stmt->bind_param("ssss", $newEmail, $newPhone, $newAddress, $username);
-    $stmt->execute();
-    $stmt->close();
+    $update = $conn->prepare("UPDATE users SET email = :email, phone = :phone, address = :address WHERE username = :username");
+    $update->execute([
+      ':email' => $newEmail,
+      ':phone' => $newPhone,
+      ':address' => $newAddress,
+      ':username' => $username
+    ]);
     $email = $newEmail;
     $phone = $newPhone;
     $address = $newAddress;
@@ -41,21 +42,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = "All fields are required.";
   }
 
-  // Profile image upload
+  // Handle image upload
   if (!empty($_FILES['profile_image']['name'])) {
     $file = $_FILES['profile_image'];
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     if (in_array($ext, $allowed)) {
       $filename = uniqid("img_", true) . '.' . $ext;
       $targetPath = "uploads/" . $filename;
 
       if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-        $stmt = $conn->prepare("UPDATE users SET profile_image = ? WHERE username = ?");
-        $stmt->bind_param("ss", $filename, $username);
-        $stmt->execute();
-        $stmt->close();
+        $updateImg = $conn->prepare("UPDATE users SET profile_image = :image WHERE username = :username");
+        $updateImg->execute([
+          ':image' => $filename,
+          ':username' => $username
+        ]);
         $currentImage = $filename;
         $success .= "<br>Profile picture updated!";
       } else {
@@ -67,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
