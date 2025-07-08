@@ -5,10 +5,9 @@ $user = "myadmin";
 $pass = "WNm50QgZaSDyHlrwJmktc8IaOl7jBJtI";
 
 try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
-    // Enable exception mode
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // echo "Connected to PostgreSQL successfully!";
+    $conn = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // echo "Connected successfully";
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
 }
