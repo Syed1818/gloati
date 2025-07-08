@@ -5,78 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GLOATI | Skincare That Glows</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Open+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Open+Sans&display=swap');
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+:root {
+  --primary: #6ca59e;
+  --primary-dark: #55877f;
+  --background: #fffaf7;
+  --text: #333;
+  --muted: #777;
+  --border: #e6e6e6;
+}
 
-  body {
-    font-family: 'Open Sans', sans-serif;
-    background-color: #fffaf7;
-    color: #2e2e2e;
-    transition: margin-left 0.3s ease;
-  }
+body, main {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+}
 
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
+.menu-toggle {
+  display: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--primary);
+}
 
-  /* Sidebar */
-  .sidebar {
-    height: 100%;
-    width: 220px;
-    position: fixed;
-    top: 0;
-    left: -220px;
-    background-color: #6ca59e;
-    padding-top: 60px;
-    transition: 0.3s;
-    z-index: 1000;
-  }
+header {
+  background: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
 
-  .sidebar a {
-    display: block;
-    padding: 16px 24px;
-    color: white;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
+.logo {
+  padding-left: auto;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary);
+}
 
-  .sidebar a:hover {
-    background-color: #55877f;
-  }
+.cart-btn {
+  background-color: var(--primary-dark);
+  color: #fff;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-  .sidebar.active {
-    left: 0;
-  }
+/* SIDEBAR */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100vh;
+  background-color: #1e2a38;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  padding-top: 1.5rem;
+}
 
-  .menu-toggle {
-    font-size: 1.2rem;
-    background: none;
-    border: none;
-    color: #2e2e2e;
-    padding: 1rem;
-    cursor: pointer;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1100;
-  }
+#sidebar.active {
+  left: 0;
+}
 
-  /* Hero */
-  .main-content {
-    margin-left: 0;
-    transition: margin-left 0.3s;
-  }
+#sidebar h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
 
-  .sidebar.active ~ .main-content {
-    margin-left: 220px;
-  }
+#sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#sidebar ul li {
+  margin: 15px 0;
+}
+
+#sidebar ul li a {
+  color: #ecf0f1;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#sidebar ul li a:hover {
+  background-color: #34495e;
+}
+
+#sidebar ul li a i {
+  font-size: 1.2rem;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 999;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* MAIN CONTAINER */
+main.container {
+  max-width: 1200px;
+  margin-left: 250px;
+  margin-top: 2rem;
+  padding: 0 1rem;
+  transition: margin-left 0.3s ease;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  text-align: center;
+}
 
     header {
         background: #fff;
