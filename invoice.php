@@ -7,7 +7,7 @@ if (!isset($_SESSION['user'])) exit("Not logged in");
 $username = $_SESSION['user'];
 
 // Connect to DB
-$conn = new mysqli("127.0.0.1", "myadmin", "syedshahid@123", "Gloati_users");
+include 'connect.php';
 if ($conn->connect_error) exit("DB connection failed");
 
 $invoiceId = $_GET['invoice_id'] ?? '';
