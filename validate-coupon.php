@@ -1,32 +1,37 @@
 <?php
-session_start(); // Make sure session is started
-include 'connect.php';
+session_start();
+include 'connect.php'; // $conn is PDO
+
+header('Content-Type: application/json');
 
 $code = strtoupper(trim($_GET['code'] ?? ''));
 $response = ['success' => false, 'message' => 'Invalid coupon'];
 
 if ($code) {
-    $stmt = $conn->prepare("SELECT discount FROM coupons WHERE code = ? AND (expires_at IS NULL OR expires_at > NOW())");
-    $stmt->bind_param("s", $code);
-    $stmt->execute();
-    $stmt->bind_result($discount);
+    try {
+        $stmt = $conn->prepare("SELECT discount FROM coupons WHERE code = :code AND (expires_at IS NULL OR expires_at > NOW())");
+        $stmt->execute([':code' => $code]);
+        $coupon = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($stmt->fetch()) {
-        $stmt->close();
+        if ($coupon) {
+            // If user is logged in, track coupon usage
+            if (isset($_SESSION['user'])) {
+                $insert = $conn->prepare("INSERT INTO used_coupons (username, coupon) VALUES (:username, :coupon)");
+                $insert->execute([
+                    ':username' => $_SESSION['user'],
+                    ':coupon' => $code
+                ]);
+            }
 
-        // Save coupon usage if user is logged in
-        if (isset($_SESSION['user'])) {
-            $username = $_SESSION['user'];
-            $insertStmt = $conn->prepare("INSERT INTO used_coupons (username, coupon) VALUES (?, ?)");
-            $insertStmt->bind_param("ss", $username, $code);
-            $insertStmt->execute();
-            $insertStmt->close();
+            $response = [
+                'success' => true,
+                'discount' => $coupon['discount']
+            ];
+        } else {
+            $response['message'] = 'Coupon expired or not found';
         }
-
-        $response = ['success' => true, 'discount' => $discount];
-    } else {
-        $response['message'] = 'Coupon expired or not found';
-        $stmt->close();
+    } catch (PDOException $e) {
+        $response['message'] = 'Database error: ' . $e->getMessage();
     }
 }
 
