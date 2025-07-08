@@ -423,9 +423,15 @@ main.container.shifted {
       document.getElementById("products").scrollIntoView({ behavior: 'smooth' });
     }
 
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("show");
-    }
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.querySelector(".sidebar-overlay");
+  const main = document.querySelector("main.container");
+
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
+  main.classList.toggle("shifted");
+}
   </script>
 </body>
 </html>
