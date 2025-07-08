@@ -1,14 +1,15 @@
 <?php
-$host = '127.0.0.1'; // Database host (localhost in most cases)
-$db = 'Gloati_users'; // Your database name
-$user = 'myadmin'; // MySQL username
-$pass = 'syedshahid@123'; // MySQL password
+$host = "dpg-d1mc9eili9vc739c06o0-a.oregon-postgres.render.com";
+$db = "gloati_users";
+$user = "myadmin";
+$pass = "WNm50QgZaSDyHlrwJmktc8IaOl7jBJtI";
 
-// Create a MySQLi connection
-$conn = new mysqli($host, $user, $pass, $db);
-
-// Check the connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    $pdo = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
+    // Enable exception mode
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // echo "Connected to PostgreSQL successfully!";
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
 }
 ?>
