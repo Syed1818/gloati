@@ -154,7 +154,7 @@ $email = $profile['email'] ?? 'Not Provided';
         <input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" />
       </label>
       <button type="submit">Filter</button>
-      <a href="my-account.php" style="margin-left: 10px;">Reset</a>
+      <a href="my account.php" style="margin-left: 10px;">Reset</a>
     </form>
 
     <?php if (count($orders) > 0): ?>
