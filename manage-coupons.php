@@ -1,15 +1,19 @@
 <?php
 session_start();
-include 'connect.php';
+include 'connect.php'; // $conn is a PDO instance
 
 // Handle coupon addition
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_coupon'])) {
-    $code = mysqli_real_escape_string($conn, $_POST['code']);
+    $code = trim($_POST['code']);
     $discount = (float) $_POST['discount'];
     $expires_at = $_POST['expires_at'];
 
-    $insert = "INSERT INTO coupons (code, discount, expires_at) VALUES ('$code', $discount, '$expires_at')";
-    mysqli_query($conn, $insert);
+    $stmt = $conn->prepare("INSERT INTO coupons (code, discount, expires_at) VALUES (:code, :discount, :expires_at)");
+    $stmt->execute([
+        ':code' => $code,
+        ':discount' => $discount,
+        ':expires_at' => $expires_at
+    ]);
     header("Location: manage-coupons.php");
     exit();
 }
@@ -17,13 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_coupon'])) {
 // Handle coupon deletion
 if (isset($_GET['delete'])) {
     $id = (int) $_GET['delete'];
-    mysqli_query($conn, "DELETE FROM coupons WHERE id = $id");
+    $stmt = $conn->prepare("DELETE FROM coupons WHERE id = :id");
+    $stmt->execute([':id' => $id]);
     header("Location: manage-coupons.php");
     exit();
 }
 
 // Fetch all coupons
-$result = mysqli_query($conn, "SELECT * FROM coupons ORDER BY id DESC");
+$stmt = $conn->query("SELECT * FROM coupons ORDER BY id DESC");
+$coupons = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,6 +82,7 @@ $result = mysqli_query($conn, "SELECT * FROM coupons ORDER BY id DESC");
             padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
+            text-decoration: none;
         }
         .delete-btn:hover {
             background: #c0392b;
@@ -97,7 +104,7 @@ $result = mysqli_query($conn, "SELECT * FROM coupons ORDER BY id DESC");
                 <th>Expires At</th>
                 <th>Actions</th>
             </tr>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
+            <?php foreach ($coupons as $row): ?>
             <tr>
                 <td>#<?= $row['id'] ?></td>
                 <td><?= htmlspecialchars($row['code']) ?></td>
@@ -107,7 +114,7 @@ $result = mysqli_query($conn, "SELECT * FROM coupons ORDER BY id DESC");
                     <a class="delete-btn" href="?delete=<?= $row['id'] ?>" onclick="return confirm('Delete this coupon?')">Delete</a>
                 </td>
             </tr>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
         </table>
 
         <h2>Add Coupon</h2>

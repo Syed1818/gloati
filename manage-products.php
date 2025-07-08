@@ -1,27 +1,33 @@
 <?php
 session_start();
-include 'connect.php';
+include 'connect.php'; // $conn is a PDO instance
 
 // Delete product
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $conn->query("DELETE FROM products WHERE id = $id");
+    $id = (int)$_GET['delete'];
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
+    $stmt->execute([':id' => $id]);
     header("Location: manage-products.php");
     exit();
 }
 
 // Add new product
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-    $img = $_POST['image'];
+    $name = trim($_POST['name']);
+    $price = (float)$_POST['price'];
+    $img = trim($_POST['image']);
 
-    $stmt = $conn->prepare("INSERT INTO products (name, price, image) VALUES (?, ?, ?)");
-    $stmt->bind_param("sds", $name, $price, $img);
-    $stmt->execute();
+    $stmt = $conn->prepare("INSERT INTO products (name, price, image) VALUES (:name, :price, :img)");
+    $stmt->execute([
+        ':name' => $name,
+        ':price' => $price,
+        ':img' => $img
+    ]);
 }
 
-$products = $conn->query("SELECT * FROM products ORDER BY id DESC");
+// Fetch all products
+$stmt = $conn->query("SELECT * FROM products ORDER BY id DESC");
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html>
@@ -143,7 +149,7 @@ $products = $conn->query("SELECT * FROM products ORDER BY id DESC");
     <th>Image</th>
     <th>Actions</th>
   </tr>
-  <?php while ($row = $products->fetch_assoc()): ?>
+  <?php foreach ($products as $row): ?>
     <tr>
       <td><?= $row['id'] ?></td>
       <td><?= htmlspecialchars($row['name']) ?></td>
@@ -153,7 +159,7 @@ $products = $conn->query("SELECT * FROM products ORDER BY id DESC");
         <a class="btn" href="?delete=<?= $row['id'] ?>" onclick="return confirm('Are you sure to delete this product?')">Delete</a>
       </td>
     </tr>
-  <?php endwhile; ?>
+  <?php endforeach; ?>
 </table>
 
 <div class="form-container">

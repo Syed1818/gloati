@@ -1,43 +1,52 @@
 <?php
 session_start();
+include 'connect.php'; // Assumes $conn is a PDO connection
 
-include 'connect.php';
-
-// Pagination setup
+// Pagination
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
 // Filtering
 $filter = "";
+$params = [];
+
 if (!empty($_GET['username'])) {
-    $username = mysqli_real_escape_string($conn, $_GET['username']);
-    $filter = "WHERE users.username LIKE '%$username%'";
+    $filter = "WHERE users.username ILIKE :username";
+    $params[':username'] = '%' . $_GET['username'] . '%';
 }
 
-$query = "SELECT orders.*, users.username, users.email, users.phone
-          FROM orders 
-          LEFT JOIN users ON orders.user_id = users.id 
-          $filter
-          ORDER BY ordered_at DESC 
-          LIMIT $limit OFFSET $offset";
+$sql = "
+    SELECT orders.*, users.username, users.email, users.phone
+    FROM orders
+    LEFT JOIN users ON orders.user_id = users.id
+    $filter
+    ORDER BY ordered_at DESC
+    LIMIT :limit OFFSET :offset
+";
 
-
-$result = mysqli_query($conn, $query);
-if (!$result) {
-    die("Query failed: " . mysqli_error($conn));
+$stmt = $conn->prepare($sql);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
 }
-$totalQuery = "SELECT COUNT(*) as total 
-               FROM orders 
-               LEFT JOIN users ON orders.user_id = users.id 
-               $filter";
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$totalCountResult = mysqli_query($conn, $totalQuery);
-if (!$totalCountResult) {
-    die("Count query failed: " . mysqli_error($conn));
+// Count total orders
+$countSql = "
+    SELECT COUNT(*) as total 
+    FROM orders
+    LEFT JOIN users ON orders.user_id = users.id
+    $filter
+";
+$countStmt = $conn->prepare($countSql);
+foreach ($params as $key => $value) {
+    $countStmt->bindValue($key, $value);
 }
-$totalResult = mysqli_fetch_assoc($totalCountResult);
-$totalOrders = $totalResult['total'];
+$countStmt->execute();
+$totalOrders = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 $totalPages = ceil($totalOrders / $limit);
 ?>
 
@@ -80,10 +89,6 @@ $totalPages = ceil($totalOrders / $limit);
     th {
       background-color: #f0f0f0;
     }
-    .status {
-      font-weight: bold;
-      text-transform: capitalize;
-    }
     .pagination {
       margin-top: 20px;
       text-align: center;
@@ -115,36 +120,33 @@ $totalPages = ceil($totalOrders / $limit);
     </form>
 
     <table>
-<thead>
-  <tr>
-    <th>ID</th>
-    <th>Customer</th>
-    <th>Email</th> <!-- NEW -->
-    <th>Phone Number</th>
-    <th>Date</th>
-    <th>Total</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
       <tbody>
-        <?php
-        if (mysqli_num_rows($result) > 0) {
-          while ($order = mysqli_fetch_assoc($result)) {
-          echo "<tr>";
-          echo "<td>#{$order['id']}</td>";
-          echo "<td>" . (!empty($order['username']) ? htmlspecialchars($order['username']) : 'Guest') . "</td>";
-          echo "<td>" . (!empty($order['email']) ? htmlspecialchars($order['email']) : '-') . "</td>"; // NEW
-          echo "<td>" . htmlspecialchars($order['phone']) . "</td>"; // 
-          echo "<td>{$order['ordered_at']}</td>";
-          echo "<td>₹{$order['total_price']}</td>";
-          echo "<td><a href='order-items.php?id={$order['id']}'>View Items</a></td>";
-          echo "</tr>";
-          }
-        } else {
-          echo "<tr><td colspan='6'>No orders found.</td></tr>";
-        }
-        ?>
+        <?php if (count($orders) > 0): ?>
+          <?php foreach ($orders as $order): ?>
+            <tr>
+              <td>#<?= htmlspecialchars($order['id']) ?></td>
+              <td><?= htmlspecialchars($order['username'] ?? 'Guest') ?></td>
+              <td><?= htmlspecialchars($order['email'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($order['phone'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($order['ordered_at']) ?></td>
+              <td>₹<?= number_format($order['total_price'], 2) ?></td>
+              <td><a href="order-items.php?id=<?= $order['id'] ?>">View Items</a></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <tr><td colspan="7">No orders found.</td></tr>
+        <?php endif; ?>
       </tbody>
     </table>
 
