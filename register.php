@@ -5,7 +5,7 @@ include 'connect.php'; // ✅ Should use PDO
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST["username"]);
     $email    = trim($_POST["email"]);
-    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    $password = trim($_POST["password"], PASSWORD_DEFAULT);
     $address  = trim($_POST["address"]);
     $phone    = trim($_POST["phone"]);
 
