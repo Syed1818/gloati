@@ -13,11 +13,13 @@ if (!isset($_SESSION['user'])) {
 echo "Starting page...<br>";
 
 $username = $_SESSION['user'];
+echo "Logged in as: $username<br>";
 $dateFrom = $_GET['date_from'] ?? '';
 $dateTo = $_GET['date_to'] ?? '';
 $productFilter = $_GET['product_name'] ?? '';
 
 // Build dynamic query
+echo "Preparing orders query...<br>";
 $query = "SELECT product_name, quantity, total_price, ordered_at, invoice_id 
           FROM orders 
           WHERE username = :username";
@@ -36,6 +38,28 @@ if (!empty($dateTo)) {
     $params[':date_to'] = $dateTo . " 23:59:59";
 }
 $query .= " ORDER BY ordered_at DESC";
+
+try {
+    echo "Executing order query...<br>";
+    $stmt = $conn->prepare($query);
+    $stmt->execute($params);
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo "✅ Orders fetched: " . count($orders) . "<br>";
+} catch (PDOException $e) {
+    echo "❌ Order query failed: " . $e->getMessage();
+    exit();
+}
+
+try {
+    echo "Fetching profile info...<br>";
+    $profileStmt = $conn->prepare("SELECT profile_image, address, email, phone FROM users WHERE username = :username");
+    $profileStmt->execute([':username' => $username]);
+    $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+    echo "✅ Profile fetched<br>";
+} catch (PDOException $e) {
+    echo "❌ Profile query failed: " . $e->getMessage();
+    exit();
+};
 
 // Execute order query
 $stmt = $conn->prepare($query);
