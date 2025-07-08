@@ -378,87 +378,81 @@ main.container.shifted {
   <button class="checkout" onclick="checkout()">Checkout</button>
 </div>
 
+
 <main class="container">
   <form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-    <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" style="padding: 0.6rem 1rem; border: 1px solid #ccc; border-radius: 20px; font-size: 1rem;">
-
+    <input type="text" name="search" placeholder="Search products..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" style="padding: 0.6rem 1rem; border: 1px solid #ccc; border-radius: 20px; font-size: 1rem;">
     <select name="sort" style="padding: 0.6rem; border-radius: 8px;">
       <option value="">Sort by</option>
-      <option value="low" <?php if ($_GET['sort'] ?? '' == 'low') echo 'selected'; ?>>Price: Low to High</option>
-      <option value="high" <?php if ($_GET['sort'] ?? '' == 'high') echo 'selected'; ?>>Price: High to Low</option>
+      <option value="low" <?= ($_GET['sort'] ?? '') === 'low' ? 'selected' : '' ?>>Price: Low to High</option>
+      <option value="high" <?= ($_GET['sort'] ?? '') === 'high' ? 'selected' : '' ?>>Price: High to Low</option>
     </select>
-
     <select name="category" style="padding: 0.6rem; border-radius: 8px;">
       <option value="">All Categories</option>
-      <option value="skincare" <?php if ($_GET['category'] ?? '' == 'skincare') echo 'selected'; ?>>Skincare</option>
-      <option value="haircare" <?php if ($_GET['category'] ?? '' == 'haircare') echo 'selected'; ?>>Haircare</option>
-      <option value="bodycare" <?php if ($_GET['category'] ?? '' == 'bodycare') echo 'selected'; ?>>Bodycare</option>
+      <option value="skincare" <?= ($_GET['category'] ?? '') === 'skincare' ? 'selected' : '' ?>>Skincare</option>
+      <option value="haircare" <?= ($_GET['category'] ?? '') === 'haircare' ? 'selected' : '' ?>>Haircare</option>
+      <option value="bodycare" <?= ($_GET['category'] ?? '') === 'bodycare' ? 'selected' : '' ?>>Bodycare</option>
     </select>
-
     <button type="submit" style="background-color: var(--primary); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px;">Apply</button>
   </form>
 
   <div class="products">
     <?php
+    // Build query using PDO
     $search = $_GET['search'] ?? '';
     $sort = $_GET['sort'] ?? '';
     $category = $_GET['category'] ?? '';
 
     $conditions = [];
+    $params = [];
+
     if (!empty($search)) {
-      $escapedSearch = mysqli_real_escape_string($conn, $search);
-      $conditions[] = "name LIKE '%$escapedSearch%'";
+        $conditions[] = "name ILIKE :search";
+        $params[':search'] = '%' . $search . '%';
     }
     if (!empty($category)) {
-      $escapedCategory = mysqli_real_escape_string($conn, $category);
-      $conditions[] = "category = '$escapedCategory'";
+        $conditions[] = "category = :category";
+        $params[':category'] = $category;
     }
 
     $where = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
+    $orderBy = ($sort === 'low') ? 'ORDER BY price ASC' : (($sort === 'high') ? 'ORDER BY price DESC' : '');
 
-    $orderBy = '';
-    if ($sort === 'low') {
-      $orderBy = 'ORDER BY price ASC';
-    } elseif ($sort === 'high') {
-      $orderBy = 'ORDER BY price DESC';
-    }
+    $stmt = $conn->prepare("SELECT * FROM products $where $orderBy");
+    $stmt->execute($params);
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $query = "SELECT * FROM products $where $orderBy";
-    $result = mysqli_query($conn, $query);
+    foreach ($products as $row) {
+        echo '<a href="product.php?id=' . $row['id'] . '" style="text-decoration:none; color:inherit;">';
+        echo '<div class="product">';
+        echo '<img src="' . htmlspecialchars($row['image']) . '" alt="' . htmlspecialchars($row['name']) . '" />';
+        echo '<h3>' . htmlspecialchars($row['name']) . '</h3>';
 
-    while ($row = mysqli_fetch_assoc($result)) {
-      echo '<a href="product.php?id=' . $row['id'] . '" style="text-decoration:none; color:inherit;">';
-      echo '<div class="product">';
-      echo '<img src="' . htmlspecialchars($row['image']) . '" alt="' . htmlspecialchars($row['name']) . '" />';
-      echo '<h3>' . htmlspecialchars($row['name']) . '</h3>';
-      $ratingQuery = "SELECT AVG(rating) as rating, COUNT(*) as rating_count FROM reviews WHERE product_id = " . $row['id'];
-      $ratingQueryResult = mysqli_query($conn, $ratingQuery);
-      $ratingData = mysqli_fetch_assoc($ratingQueryResult);
+        // Rating logic
+        $ratingStmt = $conn->prepare("SELECT AVG(rating) as rating, COUNT(*) as rating_count FROM reviews WHERE product_id = :id");
+        $ratingStmt->execute([':id' => $row['id']]);
+        $ratingData = $ratingStmt->fetch(PDO::FETCH_ASSOC);
 
-      $averageRating = round($ratingData['rating'] ?? 0, 1);
-      $ratingCount = $ratingData['rating_count'] ?? 0;
+        $averageRating = round($ratingData['rating'] ?? 0, 1);
+        $ratingCount = $ratingData['rating_count'] ?? 0;
 
-      $starsFull = floor($averageRating);
-      $starsHalf = ($averageRating - $starsFull >= 0.5) ? 1 : 0;
-      $starsEmpty = 5 - $starsFull - $starsHalf;
+        $starsFull = floor($averageRating);
+        $starsHalf = ($averageRating - $starsFull >= 0.5) ? 1 : 0;
+        $starsEmpty = 5 - $starsFull - $starsHalf;
 
-      echo '<div style="color: #FFA41C; font-size: 0.85rem; margin-bottom: 0.4rem;">';
+        echo '<div style="color: #FFA41C; font-size: 0.85rem; margin-bottom: 0.4rem;">';
+        for ($i = 0; $i < $starsFull; $i++) echo '★';
+        if ($starsHalf) echo '½';
+        for ($i = 0; $i < $starsEmpty; $i++) echo '☆';
+        echo " ({$ratingCount} reviews)</div>";
 
-      for ($i = 0; $i < $starsFull; $i++) echo '★';
-      if ($starsHalf) echo '½';
-      for ($i = 0; $i < $starsEmpty; $i++) echo '☆';
-
-      echo " ({$ratingCount} reviews)";
-      echo '</div>';
-
-      echo '<p>₹' . number_format($row['price']) . '</p>';
-      echo '</div>';
-      echo '</a>';
+        echo '<p>₹' . number_format($row['price']) . '</p>';
+        echo '</div>';
+        echo '</a>';
     }
     ?>
   </div>
 </main>
-
 <script>
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
