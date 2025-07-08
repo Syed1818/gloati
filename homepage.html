@@ -5,236 +5,216 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GLOATI | Skincare That Glows</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Open+Sans&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Open Sans', sans-serif;
-    }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Open+Sans&display=swap');
 
-    body {
-      background-color: #fffaf7;
-      color: #2e2e2e;
-      overflow-x: hidden;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #fffaf7;
+    color: #2e2e2e;
+    transition: margin-left 0.3s ease;
+  }
 
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 240px;
-      background-color: #6ca59e;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 2rem;
-      z-index: 1000;
-      transform: translateX(-100%);
-      transition: transform 0.4s ease;
-    }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-    .sidebar.show {
-      transform: translateX(0);
-    }
+  /* Sidebar */
+  .sidebar {
+    height: 100%;
+    width: 220px;
+    position: fixed;
+    top: 0;
+    left: -220px;
+    background-color: #6ca59e;
+    padding-top: 60px;
+    transition: 0.3s;
+    z-index: 1000;
+  }
 
-    .sidebar .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
+  .sidebar a {
+    display: block;
+    padding: 16px 24px;
+    color: white;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
 
-    .sidebar a {
-      margin: 1rem 0;
-      color: white;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
+  .sidebar a:hover {
+    background-color: #55877f;
+  }
 
-    .sidebar a:hover {
-      color: #ffe;
-    }
+  .sidebar.active {
+    left: 0;
+  }
 
-    .menu-toggle {
-      position: fixed;
-      top: 1.2rem;
-      left: 1.2rem;
-      z-index: 1100;
-      background-color: #6ca59e;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
+  .menu-toggle {
+    font-size: 1.2rem;
+    background: none;
+    border: none;
+    color: #2e2e2e;
+    padding: 1rem;
+    cursor: pointer;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+  }
 
-    .menu-toggle:hover {
-      background-color: #55877f;
-    }
+  /* Hero */
+  .main-content {
+    margin-left: 0;
+    transition: margin-left 0.3s;
+  }
 
-    header {
-      margin-left: 260px;
-      padding: 1rem 2rem;
-    }
+  .sidebar.active ~ .main-content {
+    margin-left: 220px;
+  }
 
-    .hero {
-      background: url('images/brand logo png.png') center/cover no-repeat;
-      height: 85vh;
-      display: flex;
-      align-items: center;
-      padding: 0 2rem;
-      position: relative;
-      color: #fff;
-      animation: fadeIn 2s ease;
-    }
+  .hero {
+    background: url('images/brand logo png.png') center/cover no-repeat;
+    height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 2rem;
+    position: relative;
+    color: #fff;
+  }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 1;
-    }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
+  }
 
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 600px;
-      animation: slideIn 1.2s ease forwards;
-    }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    animation: fadeIn 1s ease forwards;
+  }
 
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 3rem;
-      line-height: 1.2;
-    }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
 
-    .hero p {
-      font-size: 1.2rem;
-      margin: 1rem 0 2rem;
-      color: #e8e8e8;
-    }
+  .hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #e8e8e8;
+  }
 
-    .hero button {
-      padding: 0.9rem 1.8rem;
-      background-color: #6ca59e;
-      border: none;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 30px;
-      transition: background 0.3s;
-    }
+  .hero button {
+    padding: 0.9rem 1.8rem;
+    background-color: #6ca59e;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: background 0.3s;
+  }
 
-    .hero button:hover {
-      background-color: #55877f;
-    }
+  .hero button:hover {
+    background-color: #55877f;
+  }
 
-    .section {
-      padding: 4rem 2rem;
-      text-align: center;
-      animation: fadeInUp 1s ease forwards;
-    }
+  /* Sections */
+  .section {
+    padding: 4rem 2rem;
+    text-align: center;
+  }
 
-    .section h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
-      margin-bottom: 2rem;
-      color: #4e726d;
-    }
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    color: #4e726d;
+  }
 
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      max-width: 1200px;
-      margin: auto;
-    }
+  .products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: auto;
+  }
 
-    .product {
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      padding: 1rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      transform: translateY(20px);
-      opacity: 0;
-      animation: fadeInUp 0.6s ease forwards;
-    }
+  .product {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    padding: 1rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.6s ease both;
+  }
 
-    .product:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-    }
+  .product:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
 
-    .product img {
-      width: 100%;
-      border-radius: 14px;
-    }
+  .product img {
+    width: 100%;
+    border-radius: 14px;
+  }
 
-    .product h3 {
-      margin: 1rem 0 0.5rem;
-      font-size: 1.1rem;
-      color: #444;
-    }
+  .product h3 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.1rem;
+    color: #444;
+  }
 
-    .product p {
-      font-size: 0.95rem;
-      color: #777;
-    }
+  .product p {
+    font-size: 0.95rem;
+    color: #777;
+  }
 
-    footer {
-      background: #f3f3f3;
-      padding: 2rem;
-      font-size: 0.9rem;
-      color: #666;
-      text-align: center;
-      margin-left: 240px;
-    }
+  /* Footer */
+  footer {
+    background: #f3f3f3;
+    padding: 2rem;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    @keyframes slideIn {
-      from { transform: translateX(-50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2rem; }
+    .sidebar { width: 180px; }
+    .sidebar.active ~ .main-content { margin-left: 180px; }
+  }
+</style>
 
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 200px;
-      }
-      header, .hero, footer {
-        margin-left: 0;
-      }
-      .menu-toggle {
-        left: 1rem;
-      }
-    }
-  </style>
 </head>
 <body>
   <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
   <div class="sidebar" id="sidebar">
-    <div class="logo">Gloati</div>
     <a href="my account.php">My Account</a>
     <a href="homepage.html">Home</a>
     <a href="shop.php">Shop</a>
@@ -242,7 +222,8 @@
     <a href="contact.php">Contact</a>
   </div>
 
-  <header></header>
+  <header>    <div class="logo">Gloati</div>
+</header>
 
   <section class="hero">
     <div class="hero-content">
