@@ -154,14 +154,14 @@ session_start();
     <h2>Meet the Team</h2>
 
     <div class="team-member">
-      <img src="images/zaid.png" alt="Founder">
+      <img src="zaid.png" alt="Founder">
       <div>
         <strong>Zaid Khan</strong><br />
         Founder Of Gloati & Skincare Visionary
       </div>
     </div>
     <div class="team-member">
-        <img src="images/mohit.png" alt="Founder">
+        <img src="mohit.png" alt="Founder">
         <div>
             <strong>Mohit Sharma</strong><br />
             Co-Founder Of Gloati & Skincare Visionary
