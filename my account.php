@@ -10,6 +10,7 @@ if (!isset($_SESSION['user'])) {
     header("Location: login.html");
     exit();
 }
+echo "Starting page...<br>";
 
 $username = $_SESSION['user'];
 $dateFrom = $_GET['date_from'] ?? '';
