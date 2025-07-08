@@ -1,14 +1,13 @@
 <?php
 session_start();
+include 'connect.php'; // Make sure this defines $conn using PDO
+
 if (!isset($_SESSION['user'])) {
     header("Location: login.html");
     exit();
 }
 
-$host = '127.0.0.1';
-$db = 'Gloati_users';
-$user = 'myadmin';
-$pass = 'syedshahid@123';
+
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
