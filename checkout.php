@@ -12,24 +12,23 @@ require 'PHPMailer/Exception.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// DB connection
-$conn = new mysqli('127.0.0.1', 'myadmin', 'syedshahid@123', 'Gloati_users');
-if ($conn->connect_error) {
-    die("Database connection failed.");
-}
+include 'connect.php'; // $conn is PDO
 
 $username = $_SESSION['user'];
 
-// Get user email
-$userResult = $conn->query("SELECT address,phone,id,email FROM users WHERE username = '$username'");
-if ($userResult->num_rows === 0) exit("User not found");
-$userData = $userResult->fetch_assoc();
+// Get user info
+$stmt = $conn->prepare("SELECT address, phone, id, email FROM users WHERE username = :username");
+$stmt->execute([':username' => $username]);
+$userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$userData) exit("User not found");
+
 $email = $userData['email'];
 $user_id = $userData['id'];
-$address = $userData['address'];
-$phone = $userData['phone'];
+$address = $userData['address'] ?? 'N/A';
+$phone = $userData['phone'] ?? 'N/A';
 
-// Get cart + coupon
+// Get cart & coupon
 $data = json_decode(file_get_contents("php://input"), true);
 $cart = $data['cart'] ?? [];
 $coupon = $data['coupon'] ?? null;
@@ -61,20 +60,26 @@ $pdf->Cell(40, 10, 'Price (Rs.)', 1);
 $pdf->Cell(40, 10, 'Total (Rs.)', 1);
 $pdf->Ln();
 
-// Table body
+// Insert orders and populate PDF
 $pdf->SetFont('Arial', '', 11);
 foreach ($cart as $item) {
     $name = $item['name'] ?? '';
-    $qty = $item['qty'] ?? 0;
-    $price = $item['price'] ?? 0;
+    $qty = (int)($item['qty'] ?? 0);
+    $price = (float)($item['price'] ?? 0);
     $itemTotal = $price * $qty;
     $totalAmount += $itemTotal;
 
-    // Store order in DB
-    $stmt = $conn->prepare("INSERT INTO orders (user_id, username, invoice_id, product_name, quantity, total_price) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssii", $user_id, $username, $invoiceId, $name, $qty, $itemTotal);
-    $stmt->execute();
-    $stmt->close();
+    // Save to DB
+    $orderStmt = $conn->prepare("INSERT INTO orders (user_id, username, invoice_id, product_name, quantity, total_price) 
+                                 VALUES (:user_id, :username, :invoice_id, :product_name, :quantity, :total_price)");
+    $orderStmt->execute([
+        ':user_id' => $user_id,
+        ':username' => $username,
+        ':invoice_id' => $invoiceId,
+        ':product_name' => $name,
+        ':quantity' => $qty,
+        ':total_price' => $itemTotal
+    ]);
 
     // Add to PDF
     $pdf->Cell(80, 10, $name, 1);
@@ -84,24 +89,27 @@ foreach ($cart as $item) {
     $pdf->Ln();
 }
 
-// Coupon handling
+// Handle coupon
 if ($coupon) {
-    $couponStmt = $conn->prepare("SELECT discount FROM coupons WHERE code = ?");
-    $couponStmt->bind_param("s", $coupon);
-    $couponStmt->execute();
-    $couponResult = $couponStmt->get_result();
-    if ($couponResult->num_rows > 0) {
-        $discount = $couponResult->fetch_assoc()['discount'];
-        // Save usage history (optional)
-        $conn->query("INSERT INTO used_coupons (username, coupon) VALUES ('$username', '$coupon')");
+    $couponStmt = $conn->prepare("SELECT discount FROM coupons WHERE code = :code");
+    $couponStmt->execute([':code' => $coupon]);
+    if ($row = $couponStmt->fetch(PDO::FETCH_ASSOC)) {
+        $discount = $row['discount'];
+
+        // Save coupon usage (check for duplicates)
+        try {
+            $usageStmt = $conn->prepare("INSERT INTO used_coupons (username, coupon) VALUES (:username, :coupon)");
+            $usageStmt->execute([':username' => $username, ':coupon' => $coupon]);
+        } catch (PDOException $e) {
+            // Optional: silently ignore if already used
+        }
     }
-    $couponStmt->close();
 }
 
 $discountAmount = ($totalAmount * $discount) / 100;
 $finalTotal = $totalAmount - $discountAmount;
 
-// Summary section
+// Summary in PDF
 $pdf->Ln(4);
 $pdf->SetFont('Arial', 'B', 11);
 $pdf->Cell(0, 8, "Subtotal: Rs. " . number_format($totalAmount, 2), 0, 1);
@@ -113,23 +121,21 @@ $pdf->Ln(6);
 $pdf->SetFont('Arial', 'I', 10);
 $pdf->Cell(0, 10, "Thank you for shopping with Gloati!", 0, 1, 'C');
 
-// Save PDF
-if (!file_exists(__DIR__ . '/invoices')) {
-    mkdir(__DIR__ . '/invoices', 0777, true);
+// Save invoice
+if (!is_dir('invoices')) {
+    mkdir('invoices', 0777, true);
 }
-
-// File path using invoice ID
 $pdfPath = __DIR__ . "/invoices/{$invoiceId}.pdf";
 $pdf->Output('F', $pdfPath);
 
-// Email
+// Email the PDF
 $mail = new PHPMailer(true);
 try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'jabeen9945425979@gmail.com';
-    $mail->Password = 'hglq frbr uezf aemc';
+    $mail->Password = 'hglq frbr uezf aemc'; // App password
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
