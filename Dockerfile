@@ -1,16 +1,15 @@
 FROM php:8.1-apache
 
-# Install PostgreSQL and MySQL PDO drivers
-RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql pgsql mysqli
+# Install mysqli and other necessary extensions
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Enable Apache rewrite module
+# Enable Apache mod_rewrite (optional)
 RUN a2enmod rewrite
 
-# Copy your PHP app into Apache root
+# Copy your app
 COPY . /var/www/html/
 
-# Set correct permissions (optional)
+# Permissions (optional)
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
