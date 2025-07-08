@@ -71,7 +71,7 @@ foreach ($cart as $item) {
 
     // Save to DB
     $orderStmt = $conn->prepare("INSERT INTO orders (user_id, username, invoice_id, product_name, quantity, total_price) 
-                                 VALUES (:user_id, :username, :invoice_id, :product_name, :quantity, :total_price)");
+                                VALUES (:user_id, :username, :invoice_id, :product_name, :quantity, :total_price)");
     $orderStmt->execute([
         ':user_id' => $user_id,
         ':username' => $username,
