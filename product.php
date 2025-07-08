@@ -1,4 +1,4 @@
-<?php
+<<?php
 include 'connect.php';
 
 if (!isset($_GET['id'])) {
@@ -28,7 +28,218 @@ $reviews = $reviewStmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* All your styles remain unchanged */
+    :root {
+      --primary: #6ca59e;
+      --primary-dark: #55877f;
+      --text: #333;
+      --price: #B12704;
+      --bg: #fefefe;
+      --border: #e0e0e0;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .cart-btn {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .review-form {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #f9f9f9;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .review-form h3 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    .review-form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+
+    .review-form select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .review-form button {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .review-form button:hover {
+      background-color: var(--primary-dark);
+    }
+    .product-image {
+      flex: 1 1 300px;
+      text-align: center;
+    }
+
+    .product-image img {
+      width: 100%;
+      max-width: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      background-color: #fff;
+    }
+
+    .product-info {
+      flex: 1 1 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .product-info h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+    }
+    .product-info .rating {
+      color: #FFA41C;
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+    }
+    .product-info p.description {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .product-info .price {
+      font-size: 1.4rem;
+      color: var(--price);
+      margin-bottom: 1rem;
+    }
+
+    .product-info button {
+      background-color: #FFD814;
+      border: 1px solid #FCD200;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      width: fit-content;
+    }
+
+    .product-info button:hover {
+      background-color: #F7CA00;
+    }
+
+    #cartItems {
+      position: fixed;
+      top: 4.5rem;
+      right: 1rem;
+      width: 340px;
+      background: white;
+      border-radius: 14px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      display: none;
+      z-index: 1001;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #cartItems ul {
+      padding: 0;
+      list-style: none;
+    }
+
+    #cartItems li {
+      margin-bottom: 1rem;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    #cartItems input[type="text"] {
+      width: 65%;
+      padding: 0.4rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    #cartItems button {
+      padding: 0.3rem 0.6rem;
+      margin: 0.2rem;
+      background-color: #f2f2f2;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .checkout {
+      width: 100%;
+      margin-top: 1rem;
+      background: var(--primary);
+      color: white;
+      padding: 0.6rem;
+      font-weight: bold;
+      border-radius: 30px;
+      border: none;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .product-info {
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
