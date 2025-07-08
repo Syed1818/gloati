@@ -18,12 +18,13 @@ $email = $emailData['email'] ?? '';
 $orderStmt = $conn->prepare("
     SELECT product_name, quantity, total_price 
     FROM orders 
-    WHERE username = :username 
-    ORDER BY ordered_at DESC 
-    LIMIT 5
+    WHERE username = :username AND invoice_id = :invoice_id
 ");
-$orderStmt->execute([':username' => $username]);
-$orders = $orderStmt->fetchAll();
+$orderStmt->execute([
+    ':username' => $username,
+    ':invoice_id' => $invoiceId
+]);
+$orders = $orderStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $total = 0;
 foreach ($orders as $order) {

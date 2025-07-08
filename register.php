@@ -1,32 +1,41 @@
 <?php
 session_start();
-include 'connect.php';
+include 'connect.php'; // ✅ Should use PDO
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = mysqli_real_escape_string($conn, $_POST["username"]);
-    $email = mysqli_real_escape_string($conn, $_POST["email"]);
+    $username = trim($_POST["username"]);
+    $email    = trim($_POST["email"]);
     $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
-    $address = mysqli_real_escape_string($conn, $_POST["address"]);
-    $phone = mysqli_real_escape_string($conn, $_POST["phone"]);
+    $address  = trim($_POST["address"]);
+    $phone    = trim($_POST["phone"]);
 
-    // Check for duplicate username/email
-    $check = $conn->query("SELECT * FROM users WHERE username = '$username' OR email = '$email'");
-    if ($check->num_rows > 0) {
+    // Check if username or email already exists
+    $checkStmt = $conn->prepare("SELECT id FROM users WHERE username = :username OR email = :email");
+    $checkStmt->execute([':username' => $username, ':email' => $email]);
+    if ($checkStmt->rowCount() > 0) {
         echo "Username or Email already exists!";
         exit();
     }
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password, address, phone) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $username, $email, $password, $address, $phone);
+    // Insert new user
+    $insertStmt = $conn->prepare("
+        INSERT INTO users (username, email, password, address, phone)
+        VALUES (:username, :email, :password, :address, :phone)
+    ");
+    $success = $insertStmt->execute([
+        ':username' => $username,
+        ':email'    => $email,
+        ':password' => $password,
+        ':address'  => $address,
+        ':phone'    => $phone
+    ]);
 
-    if ($stmt->execute()) {
+    if ($success) {
         $_SESSION['user'] = $username;
         header("Location: homepage.html");
+        exit();
     } else {
         echo "Registration failed!";
     }
-
-    $stmt->close();
-    $conn->close();
 }
 ?>
