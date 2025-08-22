@@ -11,9 +11,15 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
-    return $pdo; // ✅ return the connection instead of echo
+
+    // ✅ Test query: get server time
+    $stmt = $pdo->query("SELECT NOW() as server_time");
+    $row = $stmt->fetch();
+
+    echo "✅ Successfully connected to Render PostgreSQL!<br>";
+    echo "⏰ Server time: " . $row['server_time'];
+
 } catch (PDOException $e) {
-    error_log("Database connection failed: " . $e->getMessage());
-    throw $e; // ✅ throw error so calling file can handle it
+    echo "❌ Connection failed: " . $e->getMessage();
 }
 ?>
