@@ -6,10 +6,10 @@ $user = "myadmin";
 $password = "XwXE4IolsAZeSmqU0qhQ9DAgEKNPjXLG";
 
 try {
-    $conn = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // echo "Connected successfully";
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;";
+    $pdo = new PDO($dsn, $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    echo "Successfully connected to the database!";
 } catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    echo "Connection failed: " . $e->getMessage();
 }
 ?>
